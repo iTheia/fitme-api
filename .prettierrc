@@ -1,6 +1,6 @@
 {
   "extends": ["airbnb-base", "prettier"],
-  "singleQuote": false,
+  "singleQuote": true,
   "trailingComma": "all",
   "endOfLine": "auto"
 }
