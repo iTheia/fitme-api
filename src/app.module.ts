@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HealthCheckModule } from './modules/health-check/health-check.module';
 import { ConfigModule } from '@nestjs/config';
 import { config, configSchemaValidation } from './config';
 
@@ -9,6 +10,7 @@ import { config, configSchemaValidation } from './config';
       load: config,
       validationSchema: configSchemaValidation,
     }),
+    HealthCheckModule,
   ],
 })
 export class AppModule {}
