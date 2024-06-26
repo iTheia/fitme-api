@@ -1,0 +1,14 @@
+services:
+  web:
+    container_name: fitme-api
+    restart: always
+    build: .
+    ports:
+      - '5000:3000'
+    links:
+      - mongo
+  mongo:
+    container_name: mongoDataBase
+    image: mongo
+    ports:
+      - '27018:27017'
