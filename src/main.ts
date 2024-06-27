@@ -8,7 +8,7 @@ async function bootstrap() {
   const logger = new Logger('Main');
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const port = configService.get('PORT');
+  const appConfig = configService.get('app');
 
   const config = new DocumentBuilder()
     .setTitle('fitme api')
@@ -19,10 +19,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(port, () => {
-    logger.log(`Service started on port ${port}`);
+  await app.listen(appConfig.port, () => {
+    logger.log(`Service started on port ${appConfig.port}`);
   });
 
-  logger.log(`Swagger http://localhost:3000/api`);
+  logger.log(`Swagger ${appConfig.host}:${appConfig.port}/api`);
 }
 bootstrap();
