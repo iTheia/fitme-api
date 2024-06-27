@@ -1,14 +1,16 @@
 services:
-  web:
+  api:
     container_name: fitme-api
     restart: always
     build: .
     ports:
       - '5000:3000'
-    links:
+    depends_on:
       - mongo
+    environment:
+      - DATABASE_URL=mongodb://mongo/fitme
+      - NODE_ENV=development
   mongo:
-    container_name: mongoDataBase
     image: mongo
     ports:
       - '27018:27017'
