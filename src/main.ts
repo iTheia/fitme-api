@@ -11,7 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const appConfig = configService.get('app');
 
-  app.useGlobalFilters(new GeneralExceptionFilter()); // Para todos los controladores
+  app.useGlobalFilters(new GeneralExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('fitme api')
