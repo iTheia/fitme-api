@@ -11,6 +11,9 @@ export class Auth {
   @Prop({ required: false })
   phone?: string;
 
+  @Prop({ required: false })
+  username?: string;
+
   @Prop({ required: true })
   password: string;
 }

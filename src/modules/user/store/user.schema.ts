@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User>;
+export type UserDocument = User & Document;
 
 @Schema()
 export class User {
@@ -9,17 +9,13 @@ export class User {
   name: string;
 
   @Prop({ required: false })
-  username?: string;
-
-  @Prop({ required: false })
   imageProfile?: string;
 
   @Prop({
-    required: true,
-    type: mongoose.Schema.Types.ObjectId,
+    type: Types.ObjectId,
     ref: 'Auth',
   })
-  auth: 'Auth';
+  auth: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
