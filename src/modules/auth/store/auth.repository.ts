@@ -12,7 +12,6 @@ export class AuthRepository extends BaseRepository<AuthDocument> {
   constructor(
     @InjectModel(Auth.name)
     private readonly authModel: Model<AuthDocument>,
-    private readonly authRepository: AuthRepository,
   ) {
     super(authModel, Auth.name);
   }
@@ -29,7 +28,7 @@ export class AuthRepository extends BaseRepository<AuthDocument> {
   async findLogin(loginDTO: LoginDTO) {
     const { username, password } = loginDTO;
 
-    const access = await this.authRepository.findOneOrFail({
+    const access = await this.findOneOrFail({
       username,
     });
 
