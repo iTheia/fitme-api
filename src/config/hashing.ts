@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
 
-export default registerAs('salt', () => ({
-  salt: process.env.SALT,
+export default registerAs('secrets', () => ({
+  salt: Number(process.env.SALT),
 }));

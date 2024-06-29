@@ -1,32 +1,33 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { LogoutDTO } from './dto/logout-auth.dto';
 
-import { UserService } from '../user/user.service';
 import { TokenService } from '../token/token.service';
-import { Auth } from './store/auth.entity';
 
 import * as bcrypt from 'bcrypt';
+import { AuthRepository } from './store/auth.repository';
+import { UserRepository } from '../user/store/user.repository';
 
+const SALT = 10;
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Auth.name) private readonly AuthModel: Model<Auth>,
-    private readonly userService: UserService,
     private readonly tokenService: TokenService,
+    private readonly authRepository: AuthRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
-  async register(registerDTO: RegisterDTO): Promise<{ access_token: string }> {
+  async register(registerDTO: RegisterDTO) {
     try {
       const { username, mail, password, phone, name } = registerDTO;
 
-      const hash = await bcrypt.hash(password, 10);
+      await this.authRepository.failIfExist({ username });
 
-      const accessUser = new this.AuthModel({
+      const hash = await bcrypt.hash(password, SALT);
+
+      const accessUser = await this.authRepository.create({
         mail,
         password: hash,
         phone,
@@ -34,9 +35,9 @@ export class AuthService {
       });
       await accessUser.save();
 
-      const user = await this.userService.create({
+      const user = await this.userRepository.create({
         name,
-        auth: accessUser,
+        auth: accessUser._id,
       });
 
       return await this.tokenService.createToken({
@@ -50,14 +51,16 @@ export class AuthService {
 
   async login(loginDTO: LoginDTO) {
     try {
-      const { username, password } = loginDTO;
+      const access = await this.authRepository.findLogin(loginDTO);
 
-      const access = await this.AuthModel.findOne({ password, username });
+      const user = await this.userRepository.findOneOrFail({
+        auth: access._id,
+      });
 
-      if (access === null) {
-        throw new NotFoundException('User or password not found');
-      }
-      return 'token';
+      return await this.tokenService.createToken({
+        id: user._id.toString(),
+        username: access.username,
+      });
     } catch (error) {
       return error;
     }

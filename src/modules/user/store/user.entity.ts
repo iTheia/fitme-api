@@ -14,6 +14,7 @@ export class User {
   @Prop({
     type: Types.ObjectId,
     ref: 'Auth',
+    unique: true,
   })
   auth: Types.ObjectId;
 }
