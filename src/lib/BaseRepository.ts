@@ -1,7 +1,19 @@
-import { Model, Document, FilterQuery } from 'mongoose';
+import { Model, Document, FilterQuery, Query } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
-
+import { Filter, PaginationOptions } from '@common/types';
+type filterMap = {
+  [operator: string]: (field: string, value: any) => any;
+};
 export class BaseRepository<T extends Document> {
+  filterMap: filterMap = {
+    '=': (field, value) => ({ [field]: value }),
+    in: (field, value) => ({ [field]: { $in: value } }),
+    gte: (field, value) => ({ [field]: { $gte: value } }),
+    lt: (field, value) => ({ [field]: { $lt: value } }),
+    gt: (field, value) => ({ [field]: { $gt: value } }),
+    lte: (field, value) => ({ [field]: { $lte: value } }),
+  };
+
   constructor(
     private readonly model: Model<T>,
     private readonly entityName: string,
@@ -13,8 +25,55 @@ export class BaseRepository<T extends Document> {
     return createdDocument.save();
   }
 
-  async findAll(): Promise<T[]> {
-    return this.model.find().exec();
+  private applyFilters(query: Query<any, any>, filters: Filter[]) {
+    if (!filters) return query;
+    filters.forEach((filter) => {
+      const { operator, value, field } = filter;
+
+      const filterFunction = this.filterMap[operator];
+      if (!filterFunction) {
+        throw new Error(`Unsupported filter operator: ${operator}`);
+      }
+
+      const filterObject = filterFunction(field, value);
+      query.where(filterObject);
+    });
+    return query;
+  }
+
+  private applyPagination(
+    query: Query<any, any>,
+    offset: number,
+    limit: number,
+  ) {
+    return query.skip(offset).limit(limit);
+  }
+
+  async findAll(
+    filter: FilterQuery<T> = {},
+    paginationOptions?: PaginationOptions,
+  ) {
+    const { page, limit, filters } = paginationOptions;
+    const offset = (page - 1) * limit;
+
+    let query = this.model.find(filter);
+    query = this.applyFilters(query, filters);
+
+    if (offset >= 0 && limit >= 1) {
+      query = this.applyPagination(query, offset, limit);
+    }
+
+    let countQuery = this.model.countDocuments(filter);
+    countQuery = this.applyFilters(countQuery, filters);
+
+    const [data, total_count] = await Promise.all([query.exec(), countQuery]);
+
+    return {
+      data,
+      page,
+      limit,
+      total_count,
+    };
   }
 
   async findOne(filter: FilterQuery<T>): Promise<T> {
