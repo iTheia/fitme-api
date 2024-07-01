@@ -1,4 +1,4 @@
-export class CreateTokenDto {
+export class UserTokenDTO {
   id: string;
   username: string;
 }

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TokenService } from './token.service';
-import { TokenController } from './token.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -15,7 +14,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  controllers: [TokenController],
   providers: [TokenService],
   exports: [TokenService],
 })

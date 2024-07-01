@@ -1,9 +1,17 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { LogoutDTO } from './dto/logout-auth.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { TokenService } from '../token/token.service';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -38,5 +46,11 @@ export class AuthController {
   @Post('forged-password')
   forgotPassword() {
     return this.authService.forgotPassword();
+  }
+
+  @UseGuards(TokenService)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }
