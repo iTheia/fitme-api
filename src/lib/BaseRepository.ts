@@ -16,7 +16,7 @@ export class BaseRepository<T extends Document> {
 
   constructor(
     private readonly model: Model<T>,
-    private readonly entityName: string,
+    protected readonly entityName: string,
     private readonly privateFields: string[] = [],
   ) {}
 
@@ -78,6 +78,15 @@ export class BaseRepository<T extends Document> {
 
   async findOne(filter: FilterQuery<T>): Promise<T> {
     return this.model.findOne(filter).exec();
+  }
+
+  async findOneOrFail(filter: FilterQuery<T>): Promise<T> {
+    const document = await this.model.findOne(filter).exec();
+
+    if (!document) {
+      throw new NotFoundException(`${this.entityName} not found`);
+    }
+    return document;
   }
 
   async findById(id: string): Promise<T> {

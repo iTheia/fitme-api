@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { GeneralExceptionFilter } from './filters/exceptions/http-exception.filter';
@@ -12,8 +12,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const appConfig = configService.get('app');
 
-  app.useGlobalPipes(new ValidationPipe({}));
-
+  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GeneralExceptionFilter());
 
   const config = new DocumentBuilder()
