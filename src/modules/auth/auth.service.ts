@@ -66,10 +66,6 @@ export class AuthService {
     }
   }
 
-  refreshToken() {
-    return '';
-  }
-
   changePassword() {
     return '';
   }

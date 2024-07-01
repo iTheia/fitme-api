@@ -53,4 +53,20 @@ export class TokenService implements CanActivate {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const decodedToken = this.jwtService.verify(refreshToken);
+
+      const { username, userId } = decodedToken;
+      const payload = { username, sub: userId };
+      const accessToken = this.jwtService.sign(payload, {
+        expiresIn: '1d',
+      });
+
+      return { access_token: accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
 }
