@@ -1,49 +1,74 @@
-import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
+
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
-import { LogoutDTO } from './dto/logout-auth.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from './entities/user.schema';
-import { Auth } from './entities/auth.entity';
-import * as bcrypt from 'bcrypt';
 
+import { TokenService } from '../token/token.service';
+import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+
+import * as bcrypt from 'bcrypt';
+import { AuthRepository } from './store/auth.repository';
+import { UserRepository } from '../user/store/user.repository';
+
+const SALT = 10;
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private readonly UserModel: Model<User>,
-    @InjectModel(Auth.name) private readonly AuthModel: Model<Auth>,
+    private readonly tokenService: TokenService,
+    private readonly authRepository: AuthRepository,
+    private readonly userRepository: UserRepository,
+    private readonly tokenAuth: TokenAuth,
   ) {}
-
-  login(LoginDTO: LoginDTO) {
-    LoginDTO;
-    return LoginDTO;
-  }
 
   async register(registerDTO: RegisterDTO) {
     try {
-      const { name, username, mail, password, phone } = registerDTO;
+      const { username, mail, password, phone, name } = registerDTO;
 
-      const hash = await bcrypt.hash(password, 10);
+      await this.authRepository.failIfExist({ username });
 
-      const accessUser = new this.AuthModel({ mail, hash, phone });
+      const hash = await bcrypt.hash(password, SALT);
+
+      const accessUser = await this.authRepository.create({
+        mail,
+        password: hash,
+        phone,
+        username,
+      });
       await accessUser.save();
 
-      const createUser = new this.UserModel({
+      const user = await this.userRepository.create({
         name,
-        username,
-        auth: accessUser,
+        auth: accessUser._id,
       });
-      await createUser.save();
 
-      return 'token';
+      return await this.tokenService.createToken({
+        id: user._id.toString(),
+        username: accessUser.username,
+      });
     } catch (error) {
       return error;
     }
   }
 
-  refreshToken() {
-    return '';
+  async login(loginDTO: LoginDTO) {
+    try {
+      const access = await this.authRepository.findLogin(loginDTO);
+
+      const user = await this.userRepository.findOneOrFail({
+        auth: access._id,
+      });
+
+      return await this.tokenService.createToken({
+        id: user._id.toString(),
+        username: access.username,
+      });
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async refreshToken(req: any) {
+    return this.tokenAuth.refreshToken(req.user);
   }
 
   changePassword() {
@@ -54,8 +79,7 @@ export class AuthService {
     return;
   }
 
-  logout(logoutDTO: LogoutDTO) {
-    logoutDTO;
-    return;
+  logout() {
+    return { access_token: '' };
   }
 }

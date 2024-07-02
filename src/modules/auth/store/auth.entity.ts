@@ -5,11 +5,14 @@ export type AuthDocument = HydratedDocument<Auth>;
 
 @Schema()
 export class Auth {
-  @Prop({ required: false })
+  @Prop({ required: false, unique: true })
   mail?: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, unique: true })
   phone?: string;
+
+  @Prop({ required: false, unique: true })
+  username?: string;
 
   @Prop({ required: true })
   password: string;
