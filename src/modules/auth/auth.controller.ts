@@ -1,9 +1,17 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
-import { LogoutDTO } from './dto/logout-auth.dto';
+
 import { ApiTags } from '@nestjs/swagger';
+import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,8 +24,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@Body() logoutDTO: LogoutDTO) {
-    return this.authService.logout(logoutDTO);
+  logout() {
+    return this.authService.logout();
   }
 
   @Post('register')
@@ -33,5 +41,11 @@ export class AuthController {
   @Post('forged-password')
   forgotPassword() {
     return this.authService.forgotPassword();
+  }
+
+  @UseGuards(TokenAuth)
+  @Get('refresh-token')
+  refreshToken(@Request() req) {
+    return this.authService.refreshToken(req);
   }
 }

@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
-import { LogoutDTO } from './dto/logout-auth.dto';
 
 import { TokenService } from '../token/token.service';
+
+import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+
 
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from './store/auth.repository';
@@ -17,6 +19,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
+    private readonly tokenAuth: TokenAuth,
   ) {}
 
   async register(registerDTO: RegisterDTO) {
@@ -66,6 +69,10 @@ export class AuthService {
     }
   }
 
+  async refreshToken(req: any) {
+    return this.tokenAuth.refreshToken(req.user);
+  }
+
   changePassword() {
     return '';
   }
@@ -74,8 +81,7 @@ export class AuthService {
     return;
   }
 
-  logout(logoutDTO: LogoutDTO) {
-    logoutDTO;
-    return;
+  logout() {
+    return { access_token: '' };
   }
 }

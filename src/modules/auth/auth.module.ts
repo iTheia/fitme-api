@@ -9,6 +9,8 @@ import { AuthRepository } from './store/auth.repository';
 import { User, UserSchema } from '../user/store/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TokenAuthModule } from 'src/middlewares/guards/token-auth/token.module';
+
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ]),
     UserModule,
     TokenModule,
+    TokenAuthModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository],
