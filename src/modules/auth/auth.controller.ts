@@ -9,8 +9,10 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
+
 import { ApiTags } from '@nestjs/swagger';
 import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {

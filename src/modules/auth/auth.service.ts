@@ -4,7 +4,9 @@ import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 
 import { TokenService } from '../token/token.service';
+
 import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+
 
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from './store/auth.repository';

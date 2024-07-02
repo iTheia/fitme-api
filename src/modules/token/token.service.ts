@@ -25,6 +25,7 @@ export class TokenService {
       const { username, sub } = refreshToken;
       const payload = { username, sub };
       const accessToken = await this.jwtService.signAsync(payload, {
+
         expiresIn: '1d',
       });
 
