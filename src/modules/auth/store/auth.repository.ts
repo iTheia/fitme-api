@@ -40,4 +40,14 @@ export class AuthRepository extends BaseRepository<AuthDocument> {
 
     return access;
   }
+
+  async findUserByMail(mail: string) {
+    const auth = await this.findOne({ mail });
+
+    if (!auth) {
+      return null;
+    }
+
+    return auth;
+  }
 }
