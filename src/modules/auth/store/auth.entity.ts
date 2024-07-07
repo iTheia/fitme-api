@@ -8,14 +8,17 @@ export class Auth {
   @Prop({ required: false, unique: true })
   mail?: string;
 
-  @Prop({ required: false, unique: true })
+  @Prop()
   phone?: string;
 
-  @Prop({ required: false, unique: true })
+  @Prop()
   username?: string;
 
-  @Prop({ required: true })
+  @Prop()
   password: string;
+
+  @Prop({ required: false })
+  oauth: string;
 }
 
 export const AuthSchema = SchemaFactory.createForClass(Auth);

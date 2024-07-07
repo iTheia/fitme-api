@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { RefreshToken } from './dto/refresh-token.dto';
+import { RefreshToken } from './refresh-token.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()

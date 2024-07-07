@@ -10,7 +10,8 @@ import { User, UserSchema } from '../user/store/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenAuthModule } from 'src/middlewares/guards/token-auth/token.module';
-
+import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
+import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
 
 @Module({
   imports: [
@@ -31,6 +32,6 @@ import { TokenAuthModule } from 'src/middlewares/guards/token-auth/token.module'
     TokenAuthModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository],
+  providers: [AuthService, AuthRepository, GoogleStrategy, GoogleOauthGuard],
 })
 export class AuthModule {}
