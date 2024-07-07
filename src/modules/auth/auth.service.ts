@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { TokenService } from '../token/token.service';
@@ -9,6 +9,8 @@ import { UserRepository } from '../user/store/user.repository';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthProvider } from './types';
+import { ForgotPassword } from './dto/forgotPassword-auth.dto';
+import { ChangePassword } from './dto/changePassword-auth.dto';
 
 const SALT = 10;
 const MAX_AGE = 60 * 60 * 60 * 24 * 7;
@@ -129,12 +131,82 @@ export class AuthService {
     }
   }
 
-  changePassword() {
-    return '';
+  async changePassword(changePassword: ChangePassword, req: any) {
+    try {
+      const token = req.cookies['access_token'];
+
+      const userToken = await this.tokenService.validateToken(token);
+
+      const access = await this.authRepository.findOneOrFail({
+        username: userToken.username,
+      });
+
+      const comparePasswords = await bcrypt.compare(
+        changePassword.currentPassword,
+        access.password,
+      );
+
+      if (!comparePasswords) {
+        throw new HttpException(
+          'Current password is not equal',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const hash = await bcrypt.hash(changePassword.newPassword, SALT);
+
+      await this.authRepository.update(access._id.toString(), {
+        password: hash,
+      });
+
+      return HttpStatus.OK;
+    } catch (error) {
+      return error;
+    }
   }
 
-  forgotPassword() {
-    return;
+  async forgotPassword(forgotPassword: ForgotPassword) {
+    try {
+      const { mail } = forgotPassword;
+      const userAccess = await this.authRepository.findUserByMail(mail);
+
+      if (!userAccess) {
+        throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
+      }
+
+      const user = await this.userRepository.findOneOrFail({
+        auth: userAccess._id,
+      });
+
+      const token = this.tokenService.createToken({
+        id: user._id.toString(),
+        username: user.name,
+      });
+
+      return token;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async changeForgotPassword(changePassword: ChangePassword, token: string) {
+    try {
+      const userToken = await this.tokenService.validateToken(token);
+
+      const access = await this.authRepository.findOneOrFail({
+        username: userToken.username,
+      });
+
+      const hash = await bcrypt.hash(changePassword.newPassword, SALT);
+
+      await this.authRepository.update(access._id.toString(), {
+        password: hash,
+      });
+
+      return HttpStatus.OK;
+    } catch (error) {
+      return error;
+    }
   }
 
   logout() {
