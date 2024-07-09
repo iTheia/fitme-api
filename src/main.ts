@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { GeneralExceptionFilter } from './filters/exceptions/http-exception.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const logger = new Logger('Main');
@@ -13,6 +14,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new GeneralExceptionFilter());
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
     .setTitle('fitme api')

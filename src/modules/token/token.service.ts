@@ -1,11 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserTokenDTO } from './dto/user-token.dto';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshToken } from './dto/refresh-token.dto';
-
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class TokenService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   async createToken(createTokenDto: UserTokenDTO) {
     try {
@@ -31,6 +39,22 @@ export class TokenService {
       return { access_token: accessToken };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async validateToken(token: string) {
+    try {
+      const secret = this.configService.get('secretToken.secretToken');
+
+      const verify = this.jwtService.verifyAsync(token, { secret });
+
+      if (!verify) {
+        throw new HttpException('Token is invalid', HttpStatus.BAD_REQUEST);
+      }
+
+      return verify;
+    } catch (error) {
+      return error;
     }
   }
 }

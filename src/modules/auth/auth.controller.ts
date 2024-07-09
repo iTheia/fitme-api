@@ -4,9 +4,10 @@ import {
   Body,
   UseGuards,
   Get,
-  Request,
   Req,
   Res,
+  Param,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login-auth.dto';
@@ -15,6 +16,8 @@ import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
 import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
+import { ForgotPassword } from './dto/forgotPassword-auth.dto';
+import { ChangePassword } from './dto/changePassword-auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -36,14 +39,22 @@ export class AuthController {
     return this.authService.register(registerDTO);
   }
 
-  @Post('change-password')
-  changePassword() {
-    return this.authService.changePassword();
+  @Patch('change-password')
+  changePassword(@Body() changePassword: ChangePassword, @Req() req: Request) {
+    return this.authService.changePassword(changePassword, req);
   }
 
   @Post('forged-password')
-  forgotPassword() {
-    return this.authService.forgotPassword();
+  forgotPassword(@Body() forgotPassword: ForgotPassword) {
+    return this.authService.forgotPassword(forgotPassword);
+  }
+
+  @Patch('change-forged-password/:token')
+  changeForgotPassword(
+    @Body() changePassword: ChangePassword,
+    @Param('token') token: string,
+  ) {
+    return this.authService.changeForgotPassword(changePassword, token);
   }
 
   @Get('google')
@@ -60,7 +71,7 @@ export class AuthController {
 
   @UseGuards(TokenAuth)
   @Get('refresh-token')
-  refreshToken(@Request() req) {
+  refreshToken(@Req() req) {
     return this.authService.refreshToken(req);
   }
 }
