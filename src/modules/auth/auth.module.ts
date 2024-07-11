@@ -12,7 +12,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenAuthModule } from 'src/middlewares/guards/token-auth/token.module';
 import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
 import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
-
 @Module({
   imports: [
     JwtModule.registerAsync({

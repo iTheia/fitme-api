@@ -20,6 +20,7 @@ export class TokenService {
       const payload = {
         sub: createTokenDto.id,
         username: createTokenDto.username,
+        roles: [...createTokenDto.roles],
       };
 
       return {

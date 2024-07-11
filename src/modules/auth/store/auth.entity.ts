@@ -19,6 +19,9 @@ export class Auth {
 
   @Prop({ required: false })
   oauth: string;
+
+  @Prop()
+  roles: string[];
 }
 
 export const AuthSchema = SchemaFactory.createForClass(Auth);

@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { RefreshToken } from './refresh-token.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { Role } from '../role/role.enum';
 
 @Injectable()
 export class TokenAuth implements CanActivate {
@@ -27,8 +28,7 @@ export class TokenAuth implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.SECRET_TOKEN.get('secretToken').secretToken,
       });
-
-      request['user'] = payload;
+      request[Role.User] = payload;
     } catch {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }

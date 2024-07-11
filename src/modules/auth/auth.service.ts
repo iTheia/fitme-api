@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { TokenService } from '../token/token.service';
-import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.guard';
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from './store/auth.repository';
 import { UserRepository } from '../user/store/user.repository';
@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthProvider } from './types';
 import { ForgotPassword } from './dto/forgotPassword-auth.dto';
 import { ChangePassword } from './dto/changePassword-auth.dto';
+import { Role } from 'src/middlewares/guards/role/role.enum';
 
 const SALT = 10;
 const MAX_AGE = 60 * 60 * 60 * 24 * 7;
@@ -37,6 +38,7 @@ export class AuthService {
         password: hash,
         phone,
         username,
+        roles: [Role.User],
       });
 
       const user = await this.userRepository.create({
@@ -47,6 +49,7 @@ export class AuthService {
       return await this.tokenService.createToken({
         id: user._id.toString(),
         username: accessUser.username,
+        roles: [Role.User],
       });
     } catch (error) {
       return error;
@@ -64,6 +67,7 @@ export class AuthService {
       return await this.tokenService.createToken({
         id: user._id.toString(),
         username: access.username,
+        roles: [...access.roles],
       });
     } catch (error) {
       return error;
@@ -81,6 +85,7 @@ export class AuthService {
       const access = await this.authRepository.create({
         mail: req.user.email,
         oauth: AuthProvider.Google,
+        roles: [Role.User],
       });
 
       return this.userRepository.create({
@@ -117,6 +122,7 @@ export class AuthService {
       const token = await this.tokenService.createToken({
         id: user._id.toString(),
         username: `${req.user.firstName}`,
+        roles: [Role.User],
       });
 
       res.cookie('access_token', token, {
@@ -181,6 +187,7 @@ export class AuthService {
       const token = this.tokenService.createToken({
         id: user._id.toString(),
         username: user.name,
+        roles: [...userAccess.roles],
       });
 
       return token;
@@ -211,5 +218,9 @@ export class AuthService {
 
   logout() {
     return { access_token: '' };
+  }
+
+  guardRole(loginDTO: LoginDTO) {
+    return loginDTO;
   }
 }
