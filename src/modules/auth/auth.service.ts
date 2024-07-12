@@ -218,8 +218,4 @@ export class AuthService {
   logout() {
     return { access_token: '' };
   }
-
-  guardRole(loginDTO: LoginDTO) {
-    return loginDTO;
-  }
 }

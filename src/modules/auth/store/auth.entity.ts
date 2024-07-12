@@ -21,7 +21,7 @@ export class Auth {
   @Prop({ required: false })
   oauth: string;
 
-  @Prop({ default: ['user'] })
+  @Prop({ default: [Role.User] })
   roles: Role[];
 }
 
