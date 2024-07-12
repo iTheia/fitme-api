@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { TokenService } from '../token/token.service';
-import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
+import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.guard';
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from './store/auth.repository';
 import { UserRepository } from '../user/store/user.repository';
@@ -44,9 +44,10 @@ export class AuthService {
         auth: accessUser._id,
       });
 
-      return await this.tokenService.createToken({
+      return await this.tokenService.createUserToken({
         id: user._id.toString(),
         username: accessUser.username,
+        roles: [...accessUser.roles],
       });
     } catch (error) {
       return error;
@@ -61,9 +62,10 @@ export class AuthService {
         auth: access._id,
       });
 
-      return await this.tokenService.createToken({
+      return await this.tokenService.createUserToken({
         id: user._id.toString(),
         username: access.username,
+        roles: [...access.roles],
       });
     } catch (error) {
       return error;
@@ -71,7 +73,7 @@ export class AuthService {
   }
 
   async refreshToken(req: any) {
-    return this.tokenAuth.refreshToken(req.user);
+    return this.tokenService.refreshUserToken(req.user);
   }
 
   async authGoogle() {}
@@ -114,9 +116,12 @@ export class AuthService {
         user = await this.registerGoogle(req);
       }
 
-      const token = await this.tokenService.createToken({
+      const access = await this.authRepository.findByIdOrFail(user.auth._id);
+
+      const token = await this.tokenService.createUserToken({
         id: user._id.toString(),
         username: `${req.user.firstName}`,
+        roles: [...access.roles],
       });
 
       res.cookie('access_token', token, {
@@ -178,9 +183,10 @@ export class AuthService {
         auth: userAccess._id,
       });
 
-      const token = this.tokenService.createToken({
+      const token = this.tokenService.createUserToken({
         id: user._id.toString(),
         username: user.name,
+        roles: [...userAccess.roles],
       });
 
       return token;

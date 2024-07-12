@@ -7,7 +7,6 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { RefreshToken } from './refresh-token.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()
@@ -38,19 +37,5 @@ export class TokenAuth implements CanActivate {
   private extractTokenFromHeader(request: Request) {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
-  }
-
-  async refreshToken(refreshToken: RefreshToken) {
-    try {
-      const { username, sub } = refreshToken;
-      const payload = { username, sub };
-      const accessToken = await this.jwtService.signAsync(payload, {
-        expiresIn: '1d',
-      });
-
-      return { access_token: accessToken };
-    } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
   }
 }

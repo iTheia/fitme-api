@@ -15,11 +15,12 @@ export class TokenService {
     private configService: ConfigService,
   ) {}
 
-  async createToken(createTokenDto: UserTokenDTO) {
+  async createUserToken(createTokenDto: UserTokenDTO) {
     try {
       const payload = {
         sub: createTokenDto.id,
         username: createTokenDto.username,
+        roles: [...createTokenDto.roles],
       };
 
       return {
@@ -28,10 +29,10 @@ export class TokenService {
     } catch (error) {}
   }
 
-  async refreshToken(refreshToken: RefreshToken) {
+  async refreshUserToken(refreshToken: RefreshToken) {
     try {
-      const { username, sub } = refreshToken;
-      const payload = { username, sub };
+      const { username, sub, roles } = refreshToken;
+      const payload = { username, sub, roles };
       const accessToken = await this.jwtService.signAsync(payload, {
         expiresIn: '1d',
       });
