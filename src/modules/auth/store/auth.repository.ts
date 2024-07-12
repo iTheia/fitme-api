@@ -13,7 +13,7 @@ export class AuthRepository extends BaseRepository<AuthDocument> {
     @InjectModel(Auth.name)
     private readonly authModel: Model<AuthDocument>,
   ) {
-    super(authModel, Auth.name);
+    super(authModel, Auth.name, ['roles']);
   }
 
   async failIfExist(filter: FilterQuery<AuthDocument>): Promise<AuthDocument> {

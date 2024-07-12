@@ -3,7 +3,7 @@ import { Role } from './role.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private readonly requiredRol: string[]) {}
+  constructor(private readonly requiredRol: Role[]) {}
 
   canActivate(context: ExecutionContext) {
     const { user } = context.switchToHttp().getRequest();

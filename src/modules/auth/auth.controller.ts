@@ -14,12 +14,9 @@ import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.guard';
 import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
 import { ForgotPassword } from './dto/forgotPassword-auth.dto';
 import { ChangePassword } from './dto/changePassword-auth.dto';
-import { Role } from 'src/middlewares/guards/role/role.enum';
-import { Roles } from 'src/middlewares/guards/role/role.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -68,17 +65,5 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   googleAuthCallback(@Req() req, @Res() res: Response) {
     return this.authService.googleAuthCallback(req, res);
-  }
-
-  @UseGuards(TokenAuth)
-  @Get('refresh-token')
-  refreshToken(@Req() req) {
-    return this.authService.refreshToken(req);
-  }
-
-  @Post('prube-guard-role')
-  @Roles([Role.Admin])
-  guardRole(@Body() loginDTO: LoginDTO) {
-    return this.authService.guardRole(loginDTO);
   }
 }
