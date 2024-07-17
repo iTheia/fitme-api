@@ -1,20 +1,25 @@
 import { Module } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { ImagesController } from './images.controller';
-import { ConfigService, ConfigModule } from '@nestjs/config';
-import { MulterModule } from '@nestjs/platform-express';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Image, ImageSchema } from './store/image.entity';
+import { ImageRepository } from './store/image.repository';
 
 @Module({
   imports: [
-    MulterModule.registerAsync({
+    MongooseModule.forFeature([{ name: Image.name, schema: ImageSchema }]),
+    JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        dest: configService.get('multer').dest,
+        secret: configService.get('secretToken').secretToken,
+        signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [ImagesController],
-  providers: [ImagesService],
+  providers: [ImagesService, ImageRepository],
 })
 export class ImagesModule {}
