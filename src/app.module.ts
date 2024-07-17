@@ -7,7 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { TokenModule } from './modules/token/token.module';
 import { CategoryModule } from './modules/category/category.module';
-import { ImagesModule } from './images/images.module';
+import { ImagesModule } from './modules/images/images.module';
 
 @Module({
   imports: [

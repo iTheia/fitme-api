@@ -1,17 +1,26 @@
-import { Controller, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Param, Get, Res } from '@nestjs/common';
 import { ImagesService } from './images.service';
-import { CreateImageDto } from './dto/create-image.dto';
+import { Response } from 'express';
+
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
-  @Post()
-  create(@Body() createImageDto: CreateImageDto) {
-    return this.imagesService.create(createImageDto);
-  }
+  @Get('*')
+  findImage(@Param() params: { [key: string]: string }, @Res() res: Response) {
+    const fullPath = params[0];
+    const [dest, imageName] = fullPath.split('/').reduce(
+      (acc, part, index, array) => {
+        if (index === array.length - 1) {
+          acc[1] = part;
+        } else {
+          acc[0] += part + '/';
+        }
+        return acc;
+      },
+      ['', ''],
+    );
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.imagesService.remove(+id);
+    return this.imagesService.findImage(imageName, dest, res);
   }
 }
