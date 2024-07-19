@@ -14,20 +14,9 @@ export class ExerciseService {
     private readonly paginationService: PaginationService,
   ) {}
 
-  async createImages(file: Array<Express.Multer.File>) {
-    return this.imageService.create(file);
-  }
-
-  async createExercise(createExerciseDto: CreateExerciseDto) {
-    return this.exerciseRepository.create(createExerciseDto);
-  }
-
-  async updateExercise(id: string, updateExerciseDto: UpdateExerciseDto) {
-    return this.exerciseRepository.update(id, updateExerciseDto);
-  }
-
-  async findExercise(id: string) {
-    return this.exerciseRepository.findByIdOrFail(id);
+  async removeExercise(id: string) {
+    this.exerciseRepository.remove(id);
+    return HttpStatus.OK;
   }
 
   async findAllExercise(query: PaginationQueryDto) {
@@ -41,8 +30,19 @@ export class ExerciseService {
     return data;
   }
 
-  async removeExercise(id: string) {
-    this.exerciseRepository.remove(id);
-    return HttpStatus.OK;
+  async findExercise(id: string) {
+    return this.exerciseRepository.findByIdOrFail(id);
+  }
+
+  async createImages(file: Array<Express.Multer.File>) {
+    return this.imageService.create(file);
+  }
+
+  async createExercise(createExerciseDto: CreateExerciseDto) {
+    return this.exerciseRepository.create(createExerciseDto);
+  }
+
+  async updateExercise(id: string, updateExerciseDto: UpdateExerciseDto) {
+    return this.exerciseRepository.update(id, updateExerciseDto);
   }
 }
