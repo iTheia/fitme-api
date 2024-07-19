@@ -15,52 +15,30 @@ export class ExerciseService {
   ) {}
 
   async createImages(file: Array<Express.Multer.File>) {
-    try {
-      const imageDocument = await this.imageService.create(file);
-
-      return imageDocument;
-    } catch (error) {
-      return error;
-    }
+    return this.imageService.create(file);
   }
 
   async createExercise(createExerciseDto: CreateExerciseDto) {
-    try {
-      await this.exerciseRepository.create(createExerciseDto);
-      return HttpStatus.CREATED;
-    } catch (error) {
-      return error;
-    }
+    return this.exerciseRepository.create(createExerciseDto);
   }
 
   async updateExercise(id: string, updateExerciseDto: UpdateExerciseDto) {
-    try {
-      await this.exerciseRepository.update(id, updateExerciseDto);
-      return HttpStatus.OK;
-    } catch (error) {
-      return error;
-    }
+    return this.exerciseRepository.update(id, updateExerciseDto);
   }
 
   async findExercise(id: string) {
-    try {
-      await this.exerciseRepository.findByIdOrFail(id);
-      return HttpStatus.FOUND;
-    } catch (error) {
-      return error;
-    }
+    return this.exerciseRepository.findByIdOrFail(id);
   }
 
   async findAllExercise(query: PaginationQueryDto) {
-    try {
-      const paginationOptions =
-        this.paginationService.getPaginationOptions(query);
+    const paginationOptions =
+      this.paginationService.getPaginationOptions(query);
 
-      await this.exerciseRepository.findAll({}, paginationOptions);
-      return HttpStatus.FOUND;
-    } catch (error) {
-      return error;
-    }
+    const { data } = await this.exerciseRepository.findAll(
+      {},
+      paginationOptions,
+    );
+    return data;
   }
 
   async removeExercise(id: string) {
