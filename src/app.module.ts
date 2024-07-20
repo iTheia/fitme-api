@@ -8,6 +8,11 @@ import { UserModule } from './modules/user/user.module';
 import { TokenModule } from './modules/token/token.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ImagesModule } from './modules/images/images.module';
+<<<<<<< HEAD
+=======
+import { ExerciseModule } from './modules/exercise/exercise.module';
+import { RoutineModule } from './modules/routine/routine.module';
+>>>>>>> 5f0c3a7 (feat: add module routine)
 
 @Module({
   imports: [
@@ -29,6 +34,11 @@ import { ImagesModule } from './modules/images/images.module';
     TokenModule,
     CategoryModule,
     ImagesModule,
+<<<<<<< HEAD
+=======
+    ExerciseModule,
+    RoutineModule,
+>>>>>>> 5f0c3a7 (feat: add module routine)
   ],
 })
 export class AppModule {}
