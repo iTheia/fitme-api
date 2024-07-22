@@ -12,7 +12,7 @@ import { RoutineService } from './routine.service';
 import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
 import { PaginationQueryDto } from '@common/dto/pagination';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import { FindAllCategoriesDto } from './dto/category.dto';
 import { Roles } from 'src/middlewares/guards/role/role.decorator';
 import { Role } from 'src/middlewares/guards/role/role.enum';
 
@@ -28,11 +28,8 @@ export class RoutineController {
 
   @Get()
   @Roles([Role.User])
-  findAll(
-    @Body() category: CreateCategoryDto,
-    @Query() query: PaginationQueryDto,
-  ) {
-    return this.routineService.findAllRoutine(category, query);
+  findAll(@Query() query: FindAllCategoriesDto | PaginationQueryDto) {
+    return this.routineService.findAllRoutine(query);
   }
 
   @Get(':id')
