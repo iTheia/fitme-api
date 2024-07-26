@@ -58,20 +58,18 @@ export class BaseRepository<T extends Document> {
     const offset = (page - 1) * limit;
 
     let query = this.model.find(filter);
-    let countQuery = this.model.find(filter);
 
     filters.forEach((jsonFilter, i) => {
-      if (jsonFilter.filter === 'name') {
+      if (jsonFilter.field === 'name') {
         // @ts-ignore
         query = query.fuzzySearch(jsonFilter.value);
-        // @ts-ignore
-        countQuery = countQuery.fuzzySearch(jsonFilter.value);
         filters.splice(i, 1);
       }
     });
 
-    countQuery = this.applyFilters(countQuery, filters);
     query = this.applyFilters(query, filters);
+
+    const countQuery = this.model.find(query.getFilter());
 
     if (offset >= 0 && limit >= 1) {
       query = this.applyPagination(query, offset, limit);
