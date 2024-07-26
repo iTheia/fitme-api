@@ -9,6 +9,10 @@ import { TokenModule } from './modules/token/token.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { EventEmitterModule } from './modules/event-emitter/event-emitter.module';
+import { CategoryModule } from './modules/category/category.module';
+import { ImagesModule } from './modules/images/images.module';
+import { ExerciseModule } from './modules/exercise/exercise.module';
+import { RoutineModule } from './modules/routine/routine.module';
 
 @Module({
   imports: [
@@ -31,6 +35,10 @@ import { EventEmitterModule } from './modules/event-emitter/event-emitter.module
     NotificationModule,
     CacheModule,
     EventEmitterModule,
+    CategoryModule,
+    ImagesModule,
+    ExerciseModule,
+    RoutineModule,
   ],
 })
 export class AppModule {}

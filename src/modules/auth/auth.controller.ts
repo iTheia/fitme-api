@@ -14,11 +14,9 @@ import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.service';
 import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
 import { ForgotPassword } from './dto/forgotPassword-auth.dto';
 import { ChangePassword } from './dto/changePassword-auth.dto';
-
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -67,11 +65,5 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   googleAuthCallback(@Req() req, @Res() res: Response) {
     return this.authService.googleAuthCallback(req, res);
-  }
-
-  @UseGuards(TokenAuth)
-  @Get('refresh-token')
-  refreshToken(@Req() req) {
-    return this.authService.refreshToken(req);
   }
 }
