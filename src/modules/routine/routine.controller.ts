@@ -11,14 +11,18 @@ import {
 import { RoutineService } from './routine.service';
 import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
-import { PaginationQueryDto } from '@common/dto/pagination';
-import { FindAllCategoriesDto } from './dto/category.dto';
+import { FindAllRoutineDto } from './dto/category.dto';
 import { Roles } from 'src/middlewares/guards/role/role.decorator';
 import { Role } from 'src/middlewares/guards/role/role.enum';
+import { filters } from './pagination/filter';
+import { PaginationService } from '@modules/pagination/pagination.service';
 
 @Controller('routine')
 export class RoutineController {
-  constructor(private readonly routineService: RoutineService) {}
+  constructor(
+    private readonly routineService: RoutineService,
+    private readonly paginationService: PaginationService,
+  ) {}
 
   @Post()
   @Roles([Role.Admin])
@@ -28,8 +32,12 @@ export class RoutineController {
 
   @Get()
   @Roles([Role.User])
-  findAll(@Query() query: FindAllCategoriesDto | PaginationQueryDto) {
-    return this.routineService.findAllRoutine(query);
+  findAll(@Query() query: FindAllRoutineDto) {
+    const paginationOptions = this.paginationService.getPaginationOptions(
+      query,
+      filters,
+    );
+    return this.routineService.findAllRoutine(paginationOptions);
   }
 
   @Get(':id')
