@@ -12,6 +12,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenAuthModule } from 'src/middlewares/guards/token-auth/token.module';
 import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
 import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth.guard';
+import { EventEmitterModule } from '@modules/event-emitter/event-emitter.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { GoogleOauthGuard } from 'src/middlewares/guards/google-auth/google-auth
     UserModule,
     TokenModule,
     TokenAuthModule,
+    EventEmitterModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, GoogleStrategy, GoogleOauthGuard],

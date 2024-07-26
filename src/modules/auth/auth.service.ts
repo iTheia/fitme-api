@@ -11,6 +11,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthProvider } from './types';
 import { ForgotPassword } from './dto/forgotPassword-auth.dto';
 import { ChangePassword } from './dto/changePassword-auth.dto';
+import { EventEmitterService } from '@modules/event-emitter/event-emitter.service';
+import { parseEntity } from '@common/util';
 
 const SALT = 10;
 const MAX_AGE = 60 * 60 * 60 * 24 * 7;
@@ -22,6 +24,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly tokenAuth: TokenAuth,
     private configService: ConfigService,
+    private readonly eventEmitter: EventEmitterService,
   ) {}
 
   async register(registerDTO: RegisterDTO) {
@@ -42,6 +45,10 @@ export class AuthService {
       const user = await this.userRepository.create({
         name,
         auth: accessUser._id,
+      });
+
+      this.eventEmitter.emitEvent('account.created', {
+        account: parseEntity(user),
       });
 
       return await this.tokenService.createToken({
