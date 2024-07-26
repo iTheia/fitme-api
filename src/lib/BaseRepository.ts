@@ -30,14 +30,17 @@ export class BaseRepository<T extends Document> {
     if (!filters) return query;
     filters.forEach((filter) => {
       const { operator, value, field } = filter;
-
-      const filterFunction = this.filterMap[operator];
-      if (!filterFunction) {
-        throw new Error(`Unsupported filter operator: ${operator}`);
+      if (field === 'name') {
+        // @ts-ignore
+        query = query.fuzzySearch(value);
+      } else {
+        const filterFunction = this.filterMap[operator];
+        if (!filterFunction) {
+          throw new Error(`Unsupported filter operator: ${operator}`);
+        }
+        const filterObject = filterFunction(field, value);
+        query.where(filterObject);
       }
-
-      const filterObject = filterFunction(field, value);
-      query.where(filterObject);
     });
     return query;
   }
@@ -58,14 +61,6 @@ export class BaseRepository<T extends Document> {
     const offset = (page - 1) * limit;
 
     let query = this.model.find(filter);
-
-    filters.forEach((jsonFilter, i) => {
-      if (jsonFilter.field === 'name') {
-        // @ts-ignore
-        query = query.fuzzySearch(jsonFilter.value);
-        filters.splice(i, 1);
-      }
-    });
 
     query = this.applyFilters(query, filters);
 
