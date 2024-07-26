@@ -11,6 +11,7 @@ export enum SortOrder {
 }
 
 export interface PaginationOptions {
+  name?: string;
   limit: number;
   page: number;
   sort: {

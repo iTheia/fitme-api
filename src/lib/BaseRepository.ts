@@ -1,6 +1,7 @@
 import { Model, Document, FilterQuery, Query } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { Filter, PaginationOptions } from '@common/types';
+
 type filterMap = {
   [operator: string]: (field: string, value: any) => any;
 };
@@ -57,16 +58,29 @@ export class BaseRepository<T extends Document> {
     const offset = (page - 1) * limit;
 
     let query = this.model.find(filter);
+    let countQuery = this.model.find(filter);
+
+    filters.forEach((jsonFilter, i) => {
+      if (jsonFilter.filter === 'name') {
+        // @ts-ignore
+        query = query.fuzzySearch(jsonFilter.value);
+        // @ts-ignore
+        countQuery = countQuery.fuzzySearch(jsonFilter.value);
+        filters.splice(i, 1);
+      }
+    });
+
+    countQuery = this.applyFilters(countQuery, filters);
     query = this.applyFilters(query, filters);
 
     if (offset >= 0 && limit >= 1) {
       query = this.applyPagination(query, offset, limit);
     }
 
-    let countQuery = this.model.countDocuments(filter);
-    countQuery = this.applyFilters(countQuery, filters);
-
-    const [data, total_count] = await Promise.all([query.exec(), countQuery]);
+    const [data, total_count] = await Promise.all([
+      query.exec(),
+      countQuery.countDocuments().exec(),
+    ]);
 
     return {
       data,

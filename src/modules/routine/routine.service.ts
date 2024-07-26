@@ -2,35 +2,17 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
 import { RoutineRepository } from './store/routine.repository';
-import { PaginationService } from '@modules/pagination/pagination.service';
-import { FindAllCategoriesDto } from './dto/category.dto';
-import { CategoryRepository } from '@modules/category/store/category.repository';
-import { PaginationQueryDto } from '@common/dto/pagination';
-import { filters } from './pagination/filter';
-
+import { PaginationOptions } from '@common/types';
 @Injectable()
 export class RoutineService {
-  constructor(
-    private readonly routineRepository: RoutineRepository,
-    private readonly paginationService: PaginationService,
-    private readonly categoryRepository: CategoryRepository,
-  ) {}
+  constructor(private readonly routineRepository: RoutineRepository) {}
 
   async createRoutine(createRoutineDto: CreateRoutineDto) {
     return this.routineRepository.create(createRoutineDto);
   }
 
-  async findAllRoutine(query: FindAllCategoriesDto | PaginationQueryDto) {
-    const paginationOptions = this.paginationService.getPaginationOptions(
-      query,
-      filters,
-    );
-
-    const { data } = await this.routineRepository.findAll(
-      {},
-      paginationOptions,
-    );
-    return data;
+  async findAllRoutine(paginationOptions: PaginationOptions) {
+    return this.routineRepository.findAll({}, paginationOptions);
   }
 
   async findOneRoutine(id: string) {
