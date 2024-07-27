@@ -6,6 +6,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { TokenModule } from './modules/token/token.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { CacheModule } from './modules/cache/cache.module';
+import { EventEmitterModule } from './modules/event-emitter/event-emitter.module';
 import { CategoryModule } from './modules/category/category.module';
 import { ImagesModule } from './modules/images/images.module';
 import { ExerciseModule } from './modules/exercise/exercise.module';
@@ -21,7 +24,7 @@ import { RoutineModule } from './modules/routine/routine.module';
     HealthCheckModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory(configService: ConfigService) {
+      useFactory: (configService: ConfigService) => {
         return { uri: configService.get('database').url };
       },
       inject: [ConfigService],
@@ -29,6 +32,9 @@ import { RoutineModule } from './modules/routine/routine.module';
     AuthModule,
     UserModule,
     TokenModule,
+    NotificationModule,
+    CacheModule,
+    EventEmitterModule,
     CategoryModule,
     ImagesModule,
     ExerciseModule,

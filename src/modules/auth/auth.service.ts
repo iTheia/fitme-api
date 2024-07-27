@@ -2,7 +2,6 @@ import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { LoginDTO } from './dto/login-auth.dto';
 import { RegisterDTO } from './dto/register-auth.dto';
 import { TokenService } from '../token/token.service';
-import { TokenAuth } from 'src/middlewares/guards/token-auth/token-auth.guard';
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from './store/auth.repository';
 import { UserRepository } from '../user/store/user.repository';
@@ -11,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthProvider } from './types';
 import { ForgotPassword } from './dto/forgotPassword-auth.dto';
 import { ChangePassword } from './dto/changePassword-auth.dto';
+import { EventEmitterService } from '@modules/event-emitter/event-emitter.service';
+import { parseEntity } from '@common/util';
 
 const SALT = 10;
 const MAX_AGE = 60 * 60 * 60 * 24 * 7;
@@ -20,8 +21,8 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly authRepository: AuthRepository,
     private readonly userRepository: UserRepository,
-    private readonly tokenAuth: TokenAuth,
     private configService: ConfigService,
+    private readonly eventEmitter: EventEmitterService,
   ) {}
 
   async register(registerDTO: RegisterDTO) {
@@ -42,6 +43,10 @@ export class AuthService {
       const user = await this.userRepository.create({
         name,
         auth: accessUser._id,
+      });
+
+      this.eventEmitter.emitEvent('account.created', {
+        account: parseEntity(user),
       });
 
       return await this.tokenService.createUserToken({
