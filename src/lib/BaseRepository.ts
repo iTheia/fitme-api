@@ -1,6 +1,7 @@
 import { Model, Document, FilterQuery, Query } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { Filter, PaginationOptions } from '@common/types';
+import { string } from 'joi';
 
 type filterMap = {
   [operator: string]: (field: string, value: any) => any;
@@ -53,9 +54,14 @@ export class BaseRepository<T extends Document> {
     return query.skip(offset).limit(limit);
   }
 
+  applyPopulate(query: Query<any, any>, fieldsPopulate: string[]) {
+    return query.populate(fieldsPopulate);
+  }
+
   async findAll(
     filter: FilterQuery<T> = {},
     paginationOptions?: PaginationOptions,
+    fieldsPopulate?: string[],
   ) {
     const { page, limit, filters } = paginationOptions;
     const offset = (page - 1) * limit;
@@ -71,7 +77,7 @@ export class BaseRepository<T extends Document> {
     }
 
     const [data, total_count] = await Promise.all([
-      query.exec(),
+      this.applyPopulate(query, fieldsPopulate).exec(),
       countQuery.countDocuments().exec(),
     ]);
 
@@ -83,29 +89,34 @@ export class BaseRepository<T extends Document> {
     };
   }
 
-  async findOne(filter: FilterQuery<T>): Promise<T> {
-    return this.model.findOne(filter).exec();
+  async findOne(filter: FilterQuery<T>, fieldsPopulate?: string[]): Promise<T> {
+    const document = this.model.findOne(filter);
+    return this.applyPopulate(document, fieldsPopulate).exec();
   }
 
-  async findOneOrFail(filter: FilterQuery<T>): Promise<T> {
-    const document = await this.model.findOne(filter).exec();
+  async findOneOrFail(
+    filter: FilterQuery<T>,
+    fieldsPopulate?: string[],
+  ): Promise<T> {
+    const document = this.model.findOne(filter);
 
     if (!document) {
       throw new NotFoundException(`${this.entityName} not found`);
     }
-    return document;
+    return this.applyPopulate(document, fieldsPopulate);
   }
 
-  async findById(id: string): Promise<T> {
-    return this.model.findById(id).exec();
+  async findById(id: string, fieldsPopulate?: string[]): Promise<T> {
+    const document = this.model.findById(id);
+    return this.applyPopulate(document, fieldsPopulate).exec();
   }
 
-  async findByIdOrFail(id: string): Promise<T> {
-    const document = await this.findById(id);
+  async findByIdOrFail(id: string, fieldsPopulate?: string[]): Promise<T> {
+    const document = this.model.findById(id);
     if (!document) {
       throw new NotFoundException(`${this.entityName} with ID ${id} not found`);
     }
-    return document;
+    return this.applyPopulate(document, fieldsPopulate);
   }
 
   async update(
