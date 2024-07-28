@@ -1,6 +1,6 @@
 export interface Filter {
   filter: string;
-  operator?: '=' | 'in' | 'gte' | 'lt' | 'gt' | 'lte';
+  operator: '=' | 'in' | 'gte' | 'lt' | 'gt' | 'lte' | 'search';
   value?: string | number | Array<string | number>;
   field: string;
 }
