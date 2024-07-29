@@ -1,7 +1,6 @@
 import { Model, Document, FilterQuery, Query } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { Filter, PaginationOptions } from '@common/types';
-import { string } from 'joi';
 
 type filterMap = {
   [operator: string]: (field: string, value: any) => any;
@@ -15,6 +14,8 @@ export class BaseRepository<T extends Document> {
     gt: (field, value) => ({ [field]: { $gt: value } }),
     lte: (field, value) => ({ [field]: { $lte: value } }),
   };
+
+  defaultPopulateOptions: string[];
 
   constructor(
     private readonly model: Model<T>,
@@ -54,14 +55,41 @@ export class BaseRepository<T extends Document> {
     return query.skip(offset).limit(limit);
   }
 
-  applyPopulate(query: Query<any, any>, fieldsPopulate: string[]) {
-    return query.populate(fieldsPopulate);
+  getPopulateOptions(populateOptions: string[]) {
+    const populateFields = populateOptions.map((option) =>
+      option.split('.').reverse(),
+    );
+    let populateObj;
+    const populateArray = [];
+
+    for (const fields of populateFields) {
+      for (const index in fields) {
+        if (index === '0') {
+          populateObj = { path: fields[index] };
+          continue;
+        }
+        populateObj = { path: fields[index], populate: populateObj };
+      }
+      populateArray.push(populateObj);
+      populateObj = {};
+    }
+
+    return populateArray;
+  }
+
+  applyPopulate(query: Query<any, any>, populateStrings: string[] | string) {
+    if (Array.isArray(populateStrings)) {
+      const populateOptions = this.getPopulateOptions(populateStrings);
+      return query.populate(populateOptions);
+    }
+    const populateOptions = JSON.parse(populateStrings);
+    return query.populate(populateOptions);
   }
 
   async findAll(
     filter: FilterQuery<T> = {},
     paginationOptions?: PaginationOptions,
-    fieldsPopulate?: string[],
+    populateOptions?: string[],
   ) {
     const { page, limit, filters } = paginationOptions;
     const offset = (page - 1) * limit;
@@ -76,8 +104,18 @@ export class BaseRepository<T extends Document> {
       query = this.applyPagination(query, offset, limit);
     }
 
+    if (
+      this.defaultPopulateOptions.length !== 0 &&
+      !Array.isArray(populateOptions)
+    ) {
+      const populateOptionsString = JSON.stringify(this.defaultPopulateOptions);
+      query = this.applyPopulate(query, populateOptionsString);
+    } else {
+      query = this.applyPopulate(query, populateOptions);
+    }
+
     const [data, total_count] = await Promise.all([
-      this.applyPopulate(query, fieldsPopulate).exec(),
+      query.exec(),
       countQuery.countDocuments().exec(),
     ]);
 
@@ -89,34 +127,37 @@ export class BaseRepository<T extends Document> {
     };
   }
 
-  async findOne(filter: FilterQuery<T>, fieldsPopulate?: string[]): Promise<T> {
+  async findOne(
+    filter: FilterQuery<T>,
+    PopulateOptions?: string[],
+  ): Promise<T> {
     const document = this.model.findOne(filter);
-    return this.applyPopulate(document, fieldsPopulate).exec();
+    return this.applyPopulate(document, PopulateOptions).exec();
   }
 
   async findOneOrFail(
     filter: FilterQuery<T>,
-    fieldsPopulate?: string[],
+    PopulateOptions?: string[],
   ): Promise<T> {
     const document = this.model.findOne(filter);
 
     if (!document) {
       throw new NotFoundException(`${this.entityName} not found`);
     }
-    return this.applyPopulate(document, fieldsPopulate);
+    return this.applyPopulate(document, PopulateOptions);
   }
 
-  async findById(id: string, fieldsPopulate?: string[]): Promise<T> {
+  async findById(id: string, PopulateOptions?: string[]): Promise<T> {
     const document = this.model.findById(id);
-    return this.applyPopulate(document, fieldsPopulate).exec();
+    return this.applyPopulate(document, PopulateOptions).exec();
   }
 
-  async findByIdOrFail(id: string, fieldsPopulate?: string[]): Promise<T> {
+  async findByIdOrFail(id: string, PopulateOptions?: string[]): Promise<T> {
     const document = this.model.findById(id);
     if (!document) {
       throw new NotFoundException(`${this.entityName} with ID ${id} not found`);
     }
-    return this.applyPopulate(document, fieldsPopulate);
+    return this.applyPopulate(document, PopulateOptions);
   }
 
   async update(

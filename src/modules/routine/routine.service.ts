@@ -12,17 +12,11 @@ export class RoutineService {
   }
 
   async findAllRoutine(paginationOptions: PaginationOptions) {
-    return this.routineRepository.findAll({}, paginationOptions, [
-      'exercises',
-      'categories',
-    ]);
+    return this.routineRepository.findAll({}, paginationOptions);
   }
 
   async findOneRoutine(id: string) {
-    return this.routineRepository.findByIdOrFail(id, [
-      'exercises',
-      'categories',
-    ]);
+    return this.routineRepository.findByIdOrFail(id);
   }
 
   async updateRoutine(id: string, updateRoutineDto: UpdateRoutineDto) {
