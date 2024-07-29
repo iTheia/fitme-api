@@ -16,6 +16,8 @@ export class BaseRepository<T extends Document> {
     search: (field, value) => ({ [field]: RegExp(value, 'i') }),
   };
 
+  defaultPopulateOptions: string[];
+
   constructor(
     private readonly model: Model<T>,
     protected readonly entityName: string,
@@ -49,9 +51,41 @@ export class BaseRepository<T extends Document> {
     return query.skip(offset).limit(limit);
   }
 
+  getPopulateOptions(populateOptions: string[]) {
+    const populateFields = populateOptions.map((option) =>
+      option.split('.').reverse(),
+    );
+    let populateObj;
+    const populateArray = [];
+
+    for (const fields of populateFields) {
+      for (const index in fields) {
+        if (index === '0') {
+          populateObj = { path: fields[index] };
+          continue;
+        }
+        populateObj = { path: fields[index], populate: populateObj };
+      }
+      populateArray.push(populateObj);
+      populateObj = {};
+    }
+
+    return populateArray;
+  }
+
+  applyPopulate(query: Query<any, any>, populateStrings: string[] | string) {
+    if (Array.isArray(populateStrings)) {
+      const populateOptions = this.getPopulateOptions(populateStrings);
+      return query.populate(populateOptions);
+    }
+    const populateOptions = JSON.parse(populateStrings);
+    return query.populate(populateOptions);
+  }
+
   async findAll(
     filter: FilterQuery<T> = {},
     paginationOptions?: PaginationOptions,
+    populateOptions?: string[],
   ) {
     const { page, limit, filters } = paginationOptions;
     const offset = (page - 1) * limit;
@@ -65,6 +99,17 @@ export class BaseRepository<T extends Document> {
     if (offset >= 0 && limit >= 1) {
       query = this.applyPagination(query, offset, limit);
     }
+
+    if (
+      this.defaultPopulateOptions.length !== 0 &&
+      !Array.isArray(populateOptions)
+    ) {
+      const populateOptionsString = JSON.stringify(this.defaultPopulateOptions);
+      query = this.applyPopulate(query, populateOptionsString);
+    } else {
+      query = this.applyPopulate(query, populateOptions);
+    }
+
     const [data, total_count] = await Promise.all([
       query.exec(),
       countQuery.countDocuments().exec(),
@@ -78,29 +123,37 @@ export class BaseRepository<T extends Document> {
     };
   }
 
-  async findOne(filter: FilterQuery<T>): Promise<T> {
-    return this.model.findOne(filter).exec();
+  async findOne(
+    filter: FilterQuery<T>,
+    PopulateOptions?: string[],
+  ): Promise<T> {
+    const document = this.model.findOne(filter);
+    return this.applyPopulate(document, PopulateOptions).exec();
   }
 
-  async findOneOrFail(filter: FilterQuery<T>): Promise<T> {
-    const document = await this.model.findOne(filter).exec();
+  async findOneOrFail(
+    filter: FilterQuery<T>,
+    PopulateOptions?: string[],
+  ): Promise<T> {
+    const document = this.model.findOne(filter);
 
     if (!document) {
       throw new NotFoundException(`${this.entityName} not found`);
     }
-    return document;
+    return this.applyPopulate(document, PopulateOptions);
   }
 
-  async findById(id: string): Promise<T> {
-    return this.model.findById(id).exec();
+  async findById(id: string, PopulateOptions?: string[]): Promise<T> {
+    const document = this.model.findById(id);
+    return this.applyPopulate(document, PopulateOptions).exec();
   }
 
-  async findByIdOrFail(id: string): Promise<T> {
-    const document = await this.findById(id);
+  async findByIdOrFail(id: string, PopulateOptions?: string[]): Promise<T> {
+    const document = this.model.findById(id);
     if (!document) {
       throw new NotFoundException(`${this.entityName} with ID ${id} not found`);
     }
-    return document;
+    return this.applyPopulate(document, PopulateOptions);
   }
 
   async update(

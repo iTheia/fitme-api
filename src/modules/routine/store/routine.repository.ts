@@ -11,5 +11,9 @@ export class RoutineRepository extends BaseRepository<RoutineDocument> {
     private readonly RoutineModel: Model<RoutineDocument>,
   ) {
     super(RoutineModel, Routine.name, []);
+    this.defaultPopulateOptions = this.getPopulateOptions([
+      'exercises.categories',
+      'exercises.images',
+    ]);
   }
 }
