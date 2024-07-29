@@ -13,6 +13,7 @@ export class BaseRepository<T extends Document> {
     lt: (field, value) => ({ [field]: { $lt: value } }),
     gt: (field, value) => ({ [field]: { $gt: value } }),
     lte: (field, value) => ({ [field]: { $lte: value } }),
+    search: (field, value) => ({ [field]: RegExp(value, 'i') }),
   };
 
   defaultPopulateOptions: string[];
@@ -32,17 +33,12 @@ export class BaseRepository<T extends Document> {
     if (!filters) return query;
     filters.forEach((filter) => {
       const { operator, value, field } = filter;
-      if (field === 'name') {
-        // @ts-ignore
-        query = query.fuzzySearch(value);
-      } else {
-        const filterFunction = this.filterMap[operator];
-        if (!filterFunction) {
-          throw new Error(`Unsupported filter operator: ${operator}`);
-        }
-        const filterObject = filterFunction(field, value);
-        query.where(filterObject);
+      const filterFunction = this.filterMap[operator];
+      if (!filterFunction) {
+        throw new Error(`Unsupported filter operator: ${operator}`);
       }
+      const filterObject = filterFunction(field, value);
+      query.where(filterObject);
     });
     return query;
   }
