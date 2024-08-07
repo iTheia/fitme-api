@@ -26,10 +26,9 @@ export class AuthRepository extends BaseRepository<AuthDocument> {
   }
 
   async findLogin(loginDTO: LoginDTO) {
-    const { username, password } = loginDTO;
-
+    const { mail, password } = loginDTO;
     const access = await this.findOneOrFail({
-      username,
+      mail,
     });
 
     const hash = await bcrypt.compare(password, access.password);

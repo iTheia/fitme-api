@@ -73,12 +73,12 @@ export class BaseRepository<T extends Document> {
     return populateArray;
   }
 
-  applyPopulate(query: Query<any, any>, populateStrings: string[] | string) {
+  applyPopulate(query: Query<any, any>, populateStrings: string[]) {
     if (Array.isArray(populateStrings)) {
       const populateOptions = this.getPopulateOptions(populateStrings);
       return query.populate(populateOptions);
     }
-    const populateOptions = JSON.parse(populateStrings);
+    const populateOptions = this.defaultPopulateOptions;
     return query.populate(populateOptions);
   }
 
@@ -100,15 +100,7 @@ export class BaseRepository<T extends Document> {
       query = this.applyPagination(query, offset, limit);
     }
 
-    if (
-      this.defaultPopulateOptions.length !== 0 &&
-      !Array.isArray(populateOptions)
-    ) {
-      const populateOptionsString = JSON.stringify(this.defaultPopulateOptions);
-      query = this.applyPopulate(query, populateOptionsString);
-    } else {
-      query = this.applyPopulate(query, populateOptions);
-    }
+    query = this.applyPopulate(query, populateOptions);
 
     const [data, total_count] = await Promise.all([
       query.exec(),
