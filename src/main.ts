@@ -10,6 +10,7 @@ import { Transport } from '@nestjs/microservices';
 async function bootstrap() {
   const logger = new Logger('Main');
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   const configService = app.get(ConfigService);
   const appConfig = configService.get('app');
 
