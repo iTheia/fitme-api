@@ -6,19 +6,24 @@ export type AuthDocument = HydratedDocument<Auth>;
 
 @Schema()
 export class Auth {
-  @Prop({ required: false, unique: true })
-  mail?: string;
+  @Prop({
+    sparse: true,
+    unique: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address.'],
+  })
+  mail: string;
 
-  @Prop()
-  phone?: string;
+  @Prop({ sparse: true, unique: true, trim: true, min: 10, max: 15 })
+  phone: string;
 
-  @Prop()
-  username?: string;
+  @Prop({ sparse: true, unique: true, trim: true })
+  username: string;
 
   @Prop()
   password: string;
 
-  @Prop({ required: false })
+  @Prop({ sparse: true, unique: true })
   oauth: string;
 
   @Prop({ default: [Role.User] })
