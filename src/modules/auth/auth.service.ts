@@ -27,17 +27,20 @@ export class AuthService {
 
   async register(registerDTO: RegisterDTO) {
     try {
-      const { username, mail, password, phone, name } = registerDTO;
+      const { password, name, username, mail, ...optionalOptions } =
+        registerDTO;
 
-      await this.authRepository.failIfExist({ username });
+      await this.authRepository.failIfExist({
+        username,
+      });
 
       const hash = await bcrypt.hash(password, SALT);
 
       const accessUser = await this.authRepository.create({
-        mail,
         password: hash,
-        phone,
         username,
+        mail,
+        ...optionalOptions,
       });
 
       const user = await this.userRepository.create({
