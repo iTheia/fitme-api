@@ -15,19 +15,8 @@ export class RoutineService {
     return this.routineRepository.create(createRoutineDto);
   }
 
-  async findAllRoutine(paginationOptions: PaginationOptions, query: string) {
-    const category = await this.categoryRepository.findOneOrFail({
-      name: query,
-    });
-
-    if (category === null) {
-      return this.routineRepository.findAll({}, paginationOptions);
-    }
-
-    return this.routineRepository.findAll(
-      { categories: category._id },
-      paginationOptions,
-    );
+  async findAllRoutine(paginationOptions: PaginationOptions) {
+    return this.routineRepository.findAll({}, paginationOptions);
   }
 
   async findOneRoutine(id: string) {

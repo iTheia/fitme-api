@@ -37,10 +37,7 @@ export class RoutineController {
       query,
       filters,
     );
-    return this.routineService.findAllRoutine(
-      paginationOptions,
-      query.categories,
-    );
+    return this.routineService.findAllRoutine(paginationOptions);
   }
 
   @Get(':id')
