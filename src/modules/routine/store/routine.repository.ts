@@ -14,6 +14,7 @@ export class RoutineRepository extends BaseRepository<RoutineDocument> {
     this.defaultPopulateOptions = this.getPopulateOptions([
       'exercises.categories',
       'exercises.images',
+      'categories',
     ]);
   }
 }

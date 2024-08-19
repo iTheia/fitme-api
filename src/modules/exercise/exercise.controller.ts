@@ -23,7 +23,13 @@ export class ExerciseController {
 
   @Post('images')
   @Roles([Role.Admin])
-  @CustomFileInterceptor('private/exercises', 150 * 1000, ['png'], 'file', 10)
+  @CustomFileInterceptor(
+    'private/exercises',
+    150 * 1000,
+    ['png', 'jpg'],
+    'file',
+    10,
+  )
   createImages(@UploadedFiles() file: Array<Express.Multer.File>) {
     return this.exerciseService.createImages(file);
   }
