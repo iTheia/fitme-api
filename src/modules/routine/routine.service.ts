@@ -3,13 +3,9 @@ import { CreateRoutineDto } from './dto/create-routine.dto';
 import { UpdateRoutineDto } from './dto/update-routine.dto';
 import { RoutineRepository } from './store/routine.repository';
 import { PaginationOptions } from '@common/types';
-import { CategoryRepository } from '@modules/category/store/category.repository';
 @Injectable()
 export class RoutineService {
-  constructor(
-    private readonly routineRepository: RoutineRepository,
-    private readonly categoryRepository: CategoryRepository,
-  ) {}
+  constructor(private readonly routineRepository: RoutineRepository) {}
 
   async createRoutine(createRoutineDto: CreateRoutineDto) {
     return this.routineRepository.create(createRoutineDto);
