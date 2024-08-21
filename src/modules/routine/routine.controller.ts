@@ -25,13 +25,13 @@ export class RoutineController {
   ) {}
 
   @Post()
-  // @Roles([Role.Admin])
+  @Roles([Role.Admin])
   create(@Body() createRoutineDto: CreateRoutineDto) {
     return this.routineService.createRoutine(createRoutineDto);
   }
 
   @Get()
-  // @Roles([Role.User])
+  @Roles([Role.User])
   findAll(@Query() query: FindAllRoutineDto) {
     const paginationOptions = this.paginationService.getPaginationOptions(
       query,
