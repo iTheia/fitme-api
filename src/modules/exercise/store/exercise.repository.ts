@@ -11,5 +11,6 @@ export class ExerciseRepository extends BaseRepository<ExerciseDocument> {
     private readonly ExerciseModel: Model<ExerciseDocument>,
   ) {
     super(ExerciseModel, Exercise.name, []);
+    this.defaultPopulateOptions = this.getPopulateOptions(['images']);
   }
 }
